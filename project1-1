@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream.h>
+#define N 10
+ 
+typedef struct
+{
+	char vexs[N];                     //顶点向量	
+	int  matrix[N][N];
+	int  vexnum,arcnum;
+}Graph;
+ 
+typedef struct  
+{
+	char adjvex;
+	int lowcost;
+}Ucost;
+ 
+//函数声明：
+void CreatGraph(Graph &G);
+int locateVex(Graph G, char ch);
+int minLowcost(Graph G, Ucost edg[]);
+void MiniSpanTree(Graph G, char u);
+ 
+void main(void)
+{
+	char ch;
+	Graph G;
+	CreatGraph(G);
+	cout<<"输入构造prim最小生成树的一个起始点：";
+	cin>>ch;
+	MiniSpanTree(G,ch);
+}
+ 
+//创造一个无向图
+void CreatGraph(Graph &G)
+{
+	cout<<"请输入构造图的顶点数："<<endl;
+	cin>>G.vexnum;
+	cout<<"请输入构造图的边数："<<endl;
+	cin>>G.arcnum;
+ 
+	int i;
+	int j;
+	int k;
+	int w;
+ 
+	//初始化顶点
+	cout<<"输入表示顶点的字符:";
+	for(i=0; i<G.vexnum; i++)
+	{
+		cin>>G.vexs[i];
+	}
+ 
+	//初始化弧，0表示i到j没有边
+	for(i=0; i<G.vexnum; i++)
+	{
+		for(j=0; j<G.vexnum; j++)
+		{
+			if(i==j)
+			{
+				G.matrix[i][j]=0;
+			}
+			else
+				G.matrix[i][j]=100000; 
+		}
+	}
+    
+	//初始化边的权重
+	char v1;
+	char v2;
+	for(k=0; k<G.arcnum; k++)
+	{
+		cout<<"请输入两个点:";
+		cin>>v1;
+		cin>>v2;
+		cout<<"请输入两个点边上的权重:";
+		cin>>w;
+		//找到点的位置
+		i=locateVex(G,v1);
+		j=locateVex(G,v2);
+		G.matrix[i][j]=w;
+		G.matrix[j][i]=w;
+	}
+}
+ 
+//找到顶点在顶点向量中的位置
+int locateVex(Graph G, char ch)
+{
+	int i;
+	for(i=0; i<G.vexs[i]; i++)
+	{
+		if(G.vexs[i]==ch)return i;
+	}
+	return -1;
+}
+ 
+//生成最小生成树
+void MiniSpanTree(Graph G, char u)  //u表示开始节点
+{
+	 //申请一个辅助空间，用来记录从U到U-V的最小边
+	Ucost  closedge[N];
+ 
+	//首先要对closedge进行初始化
+	int i;
+	int j;
+	int k;
+	k=locateVex(G, u);
+	for(i=0; i<G.vexnum; i++)
+	{
+			closedge[i].adjvex=u;
+			closedge[i].lowcost=G.matrix[k][i];
+	}
+ 
+    for(i=1; i<G.vexnum; i++)
+	{
+		//找到closedge中最小权值的边所对应的邻接点
+		k=minLowcost(G,closedge);
+		closedge[k].lowcost=0;
+		cout<<"("<<closedge[k].adjvex<<","<<G.vexs[k]<<")"<<endl;          //打印出边
+		for(j=0; j<G.vexnum; j++)
+		{
+			if(G.matrix[k][j]<closedge[j].lowcost && G.matrix[k][j]!=0 && closedge[j].lowcost!=0)
+			{
+				closedge[j].adjvex=G.vexs[k];
+				closedge[j].lowcost=G.matrix[k][j];
+			}
+		}
+	}
+	 
+}
+ 
+ 
+int minLowcost(Graph G, Ucost edg[])
+{
+	int i;
+	int mark;
+	int min=100000;
+	mark=0;
+	for(i=0; i<G.vexnum; i++)
+	{
+		if(min>edg[i].lowcost && edg[i].lowcost!=0)
+		{
+			min=edg[i].lowcost;
+			mark=i;
+		}
+	}
+	return mark;
+}
